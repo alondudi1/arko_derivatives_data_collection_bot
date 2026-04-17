@@ -35,4 +35,6 @@ if os.path.exists(file_name):
 else:
     master_df = current_snapshot
 
+master_df = master_df.fillna(0)
+
 master_df.to_csv(file_name, index=False)
