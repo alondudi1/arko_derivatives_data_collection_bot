@@ -1,0 +1,27 @@
+name: Update ARKO Data
+on:
+  schedule:
+    - cron: '0 23 * * 1-5' # רץ כל יום חול ב-23:00 UTC
+  workflow_dispatch: # מאפשר הרצה ידנית
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install yfinance pandas
+      - name: Run update
+        run: python script.py
+      - name: Commit changes
+        run: |
+          git config --local user.name "GitHub Action"
+          git config --local user.email "action@github.com"
+          git add ARKO_OI_Tracker.csv
+          git commit -m "Daily update $(date +'%Y-%m-%d')" || exit 0
+          git push
