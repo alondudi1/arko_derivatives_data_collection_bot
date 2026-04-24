@@ -30,6 +30,13 @@ current_snapshot = current_snapshot.rename(columns={
 
 if os.path.exists(file_name):
     master_df = pd.read_csv(file_name)
+    
+    # בדיקה ומחיקה של עמודות התאריך הנוכחי כדי למנוע כפילויות של _x ו-_y
+    cols_to_check = [f'OI_{today_str}', f'Vol_{today_str}']
+    existing_cols = [col for col in cols_to_check if col in master_df.columns]
+    if existing_cols:
+        master_df = master_df.drop(columns=existing_cols)
+
     # מיזוג לפי המפתחות הקבועים
     master_df = pd.merge(master_df, current_snapshot, on=['strike', 'Expiration', 'Type'], how='outer')
 else:
