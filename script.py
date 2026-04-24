@@ -14,9 +14,17 @@ for exp in ticker.options:
         chain = ticker.option_chain(exp)
         calls, puts = chain.calls.copy(), chain.puts.copy()
         calls['Type'], puts['Type'] = 'Call', 'Put'
+        
         for df in [calls, puts]:
             df['Expiration'] = exp
-            # אנחנו מושכים הפעם גם את ה-Volume
+            
+            # המרת תאריך העסקה האחרונה לפורמט תאריך נקי (ללא שעות ואזורי זמן)
+            df['lastTradeDate'] = pd.to_datetime(df['lastTradeDate']).dt.tz_localize(None).dt.date
+            current_date = datetime.now().date()
+            
+            # אם העסקה האחרונה לא קרתה היום, ה-Volume האמיתי להיום הוא 0
+            df.loc[df['lastTradeDate'] < current_date, 'volume'] = 0
+            
             all_data.append(df[['strike', 'Expiration', 'Type', 'openInterest', 'volume']])
     except:
         continue
